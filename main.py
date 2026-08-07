@@ -6,7 +6,7 @@ from enemy import Enemy
 from fasts import Fasts
 from heavys import Heavys
 from text import Text
-from button import TextButton
+from button import ImageButton, TextButton
 from imageloader import loadImage
 
 def main():
@@ -18,6 +18,7 @@ def main():
     STATEMENU = "MENU"
     STATEPLAYING = "PLAYING"
     STATEGAMEOVER = "GAMEOVER"
+    STATEUPGRADE = "UPGRADE"
     gameState = STATEMENU
 
     # Initializing Basic Pygame
@@ -31,6 +32,7 @@ def main():
     spawnInterval = 3000
     minSpawnInterval = 700
     difficultyInterval = 7000
+    lastShootTime = pygame.time.get_ticks()
     lastSpawnTime = pygame.time.get_ticks()
     lastDifficultyTime = pygame.time.get_ticks()
     scaleFactor = 1
@@ -39,11 +41,11 @@ def main():
     # For Menu State
     titleImage = loadImage("assets/texts/title.png", scaleFactor, WIDTH // 2, HEIGHT // 3)
     startPromptImage = loadImage("assets/texts/pressSpace.png", scaleFactor, WIDTH // 2, HEIGHT // 2)
-    # upgradeLogo = loadImage("assets/logos/upgradelogo.png", scaleFactor, WIDTH//2, HEIGHT - 100)
-    upgradeLogo = TextButton("Upgrade", WIDTH//2, HEIGHT - 100)
+    upgradeLogo = ImageButton("assets/logos/upgradelogo.png", WIDTH//2, HEIGHT - 100)
 
     # For Playing State
     player = Player(WIDTH, HEIGHT)
+    reloadTime = player.reload
     bullets = []
     playerHealth = Text(player.health, 30, 30)
     scoreDisplay = Text(scoreText, 100, 100)
@@ -57,14 +59,18 @@ def main():
 
     # Reset Game
     def resetGame():
-        nonlocal score, spawnInterval, lastSpawnTime, lastDifficultyTime
-        player.health = 100
+        nonlocal reloadTime, score, spawnInterval, lastSpawnTime, lastDifficultyTime
+        reloadTime = player.reload
+        player.resetHealth()
         score = 0
         spawnInterval = 3000
         lastSpawnTime = pygame.time.get_ticks()
         lastDifficultyTime = pygame.time.get_ticks()
         enemies.clear()
         bullets.clear()
+    def upgrade ():
+        player.maxHealth += 100
+        player.reload -= 100
 
     # Game loop
     while running:
@@ -78,8 +84,6 @@ def main():
                     running = False
 
                 if gameState == STATEPLAYING:
-                    if event.key == pygame.K_SPACE:
-                        bullets.append(Bullet(player.rect.x, player.rect.y, player.width))
                     if event.key == pygame.K_LSHIFT:
                         gameState = STATEMENU  
 
@@ -95,7 +99,10 @@ def main():
                     elif event.key == pygame.K_LSHIFT:
                         resetGame()
                         gameState = STATEMENU
-            upgradeLogo.onClick(event)
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if gameState == STATEMENU:
+                    if upgradeLogo.inner.rect.collidepoint(event.pos):
+                        upgradeLogo.onClick(upgrade())
 
         screen.fill("black")
 
@@ -103,6 +110,14 @@ def main():
         if gameState == STATEPLAYING:
             keys = pygame.key.get_pressed()
             player.move(keys)
+
+            # Shooting
+            if currentTime - lastShootTime >= reloadTime:
+                if keys[pygame.K_SPACE]:
+                    bullets.append(Bullet(player.rect.x, player.rect.y, player.width))
+                    lastShootTime = currentTime
+
+
 
             # Enemy Spawning
             if currentTime - lastSpawnTime >= spawnInterval:
@@ -124,6 +139,7 @@ def main():
                 enemy.update()
                 if enemy.collide(player):
                     playerHealth.update(player.health)
+                    score += enemy.points
 
             # Bullet-Enemy Collisions
             for b in bullets:
@@ -172,8 +188,8 @@ def main():
 
             titleImage.draw(screen)
             startPromptImage.draw(screen)
-            upgradeLogo.draw(screen)
             enemies = [e for e in enemies if e.rect.y < HEIGHT and e.health > 0]
+            upgradeLogo.draw(screen)
 
         # --- GAME OVER STATE ---
         elif gameState == STATEGAMEOVER:

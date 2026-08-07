@@ -4,8 +4,9 @@ from healthbar import StaticHealthBar
 class Player:
     def __init__(self, screenWidth, screenHeight):
         self.name = "player"
-        self.health = 100
-        self.maxHealth = 100
+        self.maxHealth = 30
+        self.health = self.maxHealth
+        self.reload = 1500
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
         self.width = 100
@@ -37,3 +38,6 @@ class Player:
     def draw (self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
         self.healthBar.draw(screen)
+
+    def resetHealth (self):
+        self.health = self.maxHealth

@@ -4,16 +4,23 @@ from text import Text
 
 class TextButton:
     def __init__(self, text, posX, posY):
-        self.text = Text(text, posX, posY)
+        self.inner = Text(text, posX, posY)
 
     def draw (self, screen):
-        self.text.draw(screen)
+        self.inner.draw(screen)
 
-    def onClick (self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.text.rect.collidepoint(event.pos):
-                print("clicked")
-            print("clicked outside") 
+    def onClick (self, function):
+        function()
+
+class ImageButton:
+    def __init__(self, path, posX, posY):
+        self.inner = loadImage(path, 2, posX, posY)
+
+    def draw (self, screen):
+        self.inner.draw(screen)
+
+    def onClick (self, function):
+        function()
 
 
 
