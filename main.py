@@ -11,7 +11,8 @@ from imageloader import loadImage
 
 def main():
     # Screen Resolution
-    WIDTH, HEIGHT = 720, 1080
+    WIDTH, HEIGHT = 1080, 1080
+    GAMEWIDTH, GAMEHEIGHT = 720, 1080
     pygame.init()
 
     # Game states
@@ -23,11 +24,14 @@ def main():
 
     # Initializing Basic Pygame
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
+    gameScreen = pygame.Surface((GAMEWIDTH, GAMEHEIGHT))
+    gameScreenPosX, gameScreenPosY = 0, 0
     clock = pygame.time.Clock()
     running = True
 
     # Variables being used
     score = 0
+    statPoints = 0
     scoreText = f"Score: {score}"
     spawnInterval = 3000
     minSpawnInterval = 700
@@ -41,7 +45,7 @@ def main():
     # For Menu State
     titleImage = loadImage("assets/texts/title.png", scaleFactor, WIDTH // 2, HEIGHT // 3)
     startPromptImage = loadImage("assets/texts/pressSpace.png", scaleFactor, WIDTH // 2, HEIGHT // 2)
-    upgradeLogo = ImageButton("assets/logos/upgradelogo.png", WIDTH//2, HEIGHT - 100)
+    upgradeLogo = ImageButton("assets/logos/upgradelogo.png", WIDTH//2, HEIGHT - 100, 1)
 
     # For Playing State
     player = Player(WIDTH, HEIGHT)
@@ -68,9 +72,8 @@ def main():
         lastDifficultyTime = pygame.time.get_ticks()
         enemies.clear()
         bullets.clear()
-    def upgrade ():
-        player.maxHealth += 100
-        player.reload -= 100
+    def updateStat (stat, changeValue) -> int:
+        return stat + changeValue
 
     # Game loop
     while running:
@@ -102,9 +105,12 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if gameState == STATEMENU:
                     if upgradeLogo.inner.rect.collidepoint(event.pos):
-                        upgradeLogo.onClick(upgrade())
+                        gameState = STATEUPGRADE
+                        player.maxHealth = upgradeLogo.onClick(updateStat, player.maxHealth, 100)
 
-        screen.fill("black")
+        screen.fill("white")
+        gameScreen.fill("black")
+        screen.blit(gameScreen, (gameScreenPosX, gameScreenPosY))
 
         # --- PLAYING STATE ---
         if gameState == STATEPLAYING:
@@ -197,6 +203,10 @@ def main():
             startPromptImage.draw(screen)
             finalScore.draw(screen)
             returnMenuImage.draw(screen)
+
+        elif gameState == STATEUPGRADE:
+            upgradeLogo.draw(screen)
+
 
         pygame.display.flip()
         clock.tick(60)

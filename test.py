@@ -1,19 +1,14 @@
 health = 100
 speed = 1500
 
-def onSubmit (func):
-    n = int(input("Ebter: "))
+def onSubmit (func, *args):
+    global health, speed 
+    health, speed = func(*args)
 
-    if n == 1:
-        func()
-        print(health)
-        print(speed)
-    else:
-        print("Dose Nothing")
 
-def upgrade (health, speed):
-    health += 10
-    speed -= 30
 
-while True:
-    onSubmit(upgrade(health, speed))
+def upgrade (h, s):
+    return h + 10, s - 100
+
+onSubmit(upgrade, health, speed)
+print(health, speed)
