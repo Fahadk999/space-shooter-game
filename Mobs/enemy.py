@@ -2,17 +2,19 @@ import pygame
 from random import randint
 
 class Enemy:
-    def __init__(self, screenWidth):
+    def __init__(self, screenWidth, screenPosX, screenPosY):
         if not hasattr(self, 'health'): self.health = 75
         if not hasattr(self, 'points'): self.points = 30
         if not hasattr(self, 'width'): self.width = 55
         if not hasattr(self, 'height'): self.height = 55
         if not hasattr(self, 'baseSpeed'): self.baseSpeed = 2
         if not hasattr(self, 'color'): self.color = "orange"
+        self.screenPosX = screenPosX
+        self.screenPosY = screenPosY
 
         self.rect = pygame.Rect(
-            randint(0, screenWidth-self.width),
-            -self.height,
+            randint(self.screenPosX, screenWidth-self.width),
+            self.screenPosY-self.height,
             self.width,
             self.height,
         )

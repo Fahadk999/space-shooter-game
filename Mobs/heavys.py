@@ -1,7 +1,7 @@
-from enemy import Enemy
+from Mobs.enemy import Enemy
 
 class Heavys(Enemy):
-    def __init__(self, screenWidth):
+    def __init__(self, screenWidth, screenPosX, screenPosY):
         self.baseSpeed = 1
         self.health = 150
         self.width = 90
@@ -9,4 +9,4 @@ class Heavys(Enemy):
         self.color = "purple"
         self.points = 100
 
-        super().__init__(screenWidth)
+        super().__init__(screenWidth, screenPosX, screenPosY)

@@ -1,7 +1,7 @@
-from enemy import Enemy
+from Mobs.enemy import Enemy
 
 class Fasts(Enemy):
-    def __init__(self, screenWidth):
+    def __init__(self, screenWidth, screenPosX, screenPosY):
         self.baseSpeed = 4
         self.health = 35
         self.points = 50
@@ -9,4 +9,4 @@ class Fasts(Enemy):
         self.height = 30
         self.color = "red"
 
-        super().__init__(screenWidth)
+        super().__init__(screenWidth, screenPosX, screenPosY)
