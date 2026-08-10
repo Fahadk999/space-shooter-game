@@ -1,15 +1,10 @@
 import pygame
-from random import choice
-from player import Player
-from bullet import Bullet
 from Mobs.enemy import Enemy
 from Mobs.fasts import Fasts
 from Mobs.heavys import Heavys
-from text import Text
-from button import ImageButton, TextButton
-from imageloader import loadImage
 from gamestates.menustate import MenuState
 from gamestates.playstate import PlayState
+from gamestates.overstate import OverState
 
 def main():
     # Screen Resolution
@@ -22,7 +17,7 @@ def main():
     STATEPLAY = "PLAYING"
     STATEOVER = "GAMEOVER"
     STATEUPGRADE = "UPGRADE"
-    gameState = STATEMENU
+    gameState = STATEOVER
 
     # Initializing Basic Pygame
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
@@ -32,8 +27,6 @@ def main():
     running = True
 
     # Variables being used
-    score = 0
-    statPoints = 0
     mobTypes = (Enemy, Fasts, Heavys)
 
     # --- Entities and Text classes ---
@@ -44,9 +37,7 @@ def main():
     playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
 
     # For Gameover State
-    # gameOverImage = loadImage("assets/texts/gameover.png", scaleFactor, WIDTH // 2, HEIGHT // 3)
-    # finalScore = Text(f"Score: {score}", WIDTH // 2, startPromptImage.rect.y + 90)
-    # returnMenuImage = loadImage("assets/texts/pressLshift.png", scaleFactor, WIDTH // 2, HEIGHT - 100)
+    overState = OverState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
 
     # Reset Game
     # def resetGame():
@@ -59,8 +50,6 @@ def main():
         # lastDifficultyTime = pygame.time.get_ticks()
         # enemies.clear()
         # bullets.clear()
-    def updateStat (stat, changeValue) -> int:
-        return stat + changeValue
 
     # Game loop
     while running:
@@ -112,11 +101,8 @@ def main():
             menuState.draw(screen)
 
         # --- GAME OVER STATE ---
-        # elif gameState == STATEOVER:
-            # gameOverImage.draw(screen)
-            # startPromptImage.draw(screen)
-            # finalScore.draw(screen)
-            # returnMenuImage.draw(screen)
+        elif gameState == STATEOVER:
+            overState.draw(screen)
 
         pygame.display.flip()
 

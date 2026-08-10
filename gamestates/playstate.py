@@ -27,7 +27,7 @@ class PlayState:
         self.spawnInterval = 3000
         self.reloadTime = self.player.reload
         self.spawnInterval = 700
-        self.difficultyInterval = 7000
+        self.difficultyInterval = 17000
 
     def update (self, keys, dt):
         self.spawnTime += dt
