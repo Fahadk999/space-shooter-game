@@ -6,11 +6,32 @@ class OverState:
         self.score = 0 # this is temp place holder
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
+        self.screenPosX = screenPosX
+        self.screenPosY = screenPosY
         self.scaleFactor = 1
-        self.gameOverImage = loadImage("assets/texts/gameover.png", self.scaleFactor, self.screenWidth // 2, self.screenHeight // 3)
-        self.finalScore = Text(f"Score: {self.score}", screenWidth // 2, self.gameOverImage.rect.y + 130)
-        self.returnMenuImage = loadImage("assets/texts/pressLshift.png", self.scaleFactor, self.screenHeight // 2, self.screenHeight - 100)
-        self.startPromptImage = loadImage("assets/texts/pressSpace.png", self.scaleFactor, self.screenWidth // 2, self.screenHeight // 2)
+        self.gameOverImage = loadImage(
+            "assets/texts/gameover.png",
+            self.scaleFactor,
+            self.screenPosX + self.screenWidth // 2,
+            self.screenPosY + self.screenHeight // 3
+            )
+        self.finalScore = Text(
+            f"Score: {self.score}",
+            self.screenWidth // 2,
+            self.gameOverImage.rect.y + 130
+            )
+        self.returnMenuImage = loadImage(
+            "assets/texts/pressLshift.png",
+            self.scaleFactor,
+            self.screenHeight // 2 - 100,
+            self.screenHeight - 100
+            )
+        self.startPromptImage = loadImage(
+            "assets/texts/pressSpace.png",
+            self.scaleFactor,
+            self.screenWidth // 2,
+            self.screenHeight // 2
+            )
 
     def draw (self, screen):
         self.gameOverImage.draw(screen)
