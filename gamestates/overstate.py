@@ -8,6 +8,7 @@ class OverState:
         self.screenHeight = screenHeight
         self.screenPosX = screenPosX
         self.screenPosY = screenPosY
+        self.gameState = "GAMEOVER"
         self.scaleFactor = 1
         self.gameOverImage = loadImage(
             "assets/texts/gameover.png",

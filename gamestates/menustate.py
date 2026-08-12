@@ -5,6 +5,7 @@ from button import ImageButton
 class MenuState():
     def __init__(self, screenWidth, screenHeight, screenPosX, screenPosY) -> None:
         self.screenWidth = screenWidth
+        self.gameState = "MENU"
         self.screenHeight = screenHeight
         self.screenPosX = screenPosX
         self.screenPosY = screenPosY

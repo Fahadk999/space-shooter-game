@@ -14,10 +14,10 @@ def main():
 
     # Game states
     STATEMENU = "MENU"
-    STATEPLAY = "PLAYING"
-    STATEOVER = "GAMEOVER"
-    STATEUPGRADE = "UPGRADE"
-    gameState = STATEOVER
+    STATEPLAY = "PLAY"
+    STATEOVER = "OVER"
+    # STATEUPGRADE = "UPGRADE"
+    gameState = STATEMENU
 
     # Initializing Basic Pygame
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
@@ -53,7 +53,6 @@ def main():
 
     # Game loop
     while running:
-        currentTime = pygame.time.get_ticks()
         dt = clock.tick(60)
 
         for event in pygame.event.get():
@@ -65,19 +64,15 @@ def main():
 
                 if gameState == STATEPLAY:
                     if event.key == pygame.K_LSHIFT:
+                        playState.resetPlay()
                         gameState = STATEMENU  
-
                 elif gameState == STATEMENU:
                     if event.key == pygame.K_SPACE:
-                        # resetGame() 
                         gameState = STATEPLAY
-
                 elif gameState == STATEOVER:
                     if event.key == pygame.K_SPACE:
-                        # resetGame()
                         gameState = STATEPLAY
                     elif event.key == pygame.K_LSHIFT:
-                        # resetGame()
                         gameState = STATEMENU
             # if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 # if gameState == STATEMENU:
@@ -94,12 +89,10 @@ def main():
             keys = pygame.key.get_pressed()
             playState.update(keys, dt)
             playState.draw(screen)
-
         # --- MENU STATE ---
         elif gameState == STATEMENU:
             menuState.update(dt, mobTypes)
             menuState.draw(screen)
-
         # --- GAME OVER STATE ---
         elif gameState == STATEOVER:
             overState.draw(screen)

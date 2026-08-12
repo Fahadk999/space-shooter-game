@@ -10,6 +10,7 @@ from Mobs.heavys import Heavys
 class PlayState:
     def __init__(self, screenWidth, screenHeight, screenPosX, screenPosY) -> None:
         self.score = 0
+        self.gameState = "PLAY"
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
         self.screenPosX = screenPosX
@@ -74,9 +75,8 @@ class PlayState:
         self.enemies = [e for e in self.enemies if e.rect.y < self.screenHeight and e.health > 0]
 
         # Check Game Over State
-#         if self.player.health <= 0:
-#             # finalScore.update(f"Score: {score}")
-#             currState = STATEOVER
+        if self.player.health <= 0:
+            self.gameState = "OVER"
 
         scoreText = f"Score: {self.score}"
         self.scoreDisplay.update(scoreText)
@@ -94,3 +94,18 @@ class PlayState:
 
         self.playerHealth.draw(screen)
         self.scoreDisplay.draw(screen)
+
+    def resetPlay (self):
+        self.player.resetHealth()
+        self.score = 0
+        self.shootTime = 0
+        self.spawnTime = 0
+        self.difficultyTime = 0
+        self.spawnInterval = 3000
+        self.reloadTime = self.player.reload
+        self.spawnInterval = 700
+        self.difficultyInterval = 17000
+        self.enemies.clear()
+        self.bullets.clear()
+
+
