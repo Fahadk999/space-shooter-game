@@ -13,7 +13,7 @@ class Player:
         self.height = 100
         self.speed = 5
         self.rect = pygame.Rect(
-            self.screenWidth/2 - self.width/2,
+            self.screenWidth//2 - self.width//2,
             self.screenHeight - self.height*2.5,
             self.width, 
             self.height
@@ -41,3 +41,8 @@ class Player:
 
     def resetHealth (self):
         self.health = self.maxHealth
+
+    def resetPlayer (self):
+        self.resetHealth()
+        self.rect.x = self.screenWidth//2 - self.width//2
+        self.rect.y = self.screenHeight - self.height*2.5

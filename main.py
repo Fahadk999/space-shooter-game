@@ -7,17 +7,23 @@ from gamestates.playstate import PlayState
 from gamestates.overstate import OverState
 
 def main():
+    # for smaller screens use display other than 0, eg: 1
+    display = 0
     # Screen Resolution
-    WIDTH, HEIGHT = 1080, 1080
-    GAMEWIDTH, GAMEHEIGHT = 720, 1080
+    if display == 0:
+        WIDTH, HEIGHT = 1080, 1080
+        GAMEWIDTH, GAMEHEIGHT = 720, 1080
+    else:
+        WIDTH, HEIGHT = 720, 720
+        GAMEWIDTH, GAMEHEIGHT = 360, 720
     pygame.init()
 
     # Game states
     STATEMENU = "MENU"
     STATEPLAY = "PLAY"
     STATEOVER = "OVER"
-    # STATEUPGRADE = "UPGRADE"
-    gameState = STATEMENU
+    # STATEUPGRADE = "UPGRADE" for later
+    gameState = STATEPLAY
 
     # Initializing Basic Pygame
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
@@ -29,27 +35,13 @@ def main():
     # Variables being used
     mobTypes = (Enemy, Fasts, Heavys)
 
-    # --- Entities and Text classes ---
+    # State Classes
     # For Menu State
     menuState = MenuState(WIDTH, HEIGHT, 0, 0)
-
     # For Playing State
     playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
-
     # For Gameover State
     overState = OverState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
-
-    # Reset Game
-    # def resetGame():
-        # nonlocal reloadTime, score, spawnInterval, lastSpawnTime, lastDifficultyTime
-        # reloadTime = player.reload
-        # player.resetHealth()
-        # score = 0
-        # spawnInterval = 3000
-        # lastSpawnTime = pygame.time.get_ticks()
-        # lastDifficultyTime = pygame.time.get_ticks()
-        # enemies.clear()
-        # bullets.clear()
 
     # Game loop
     while running:
@@ -64,31 +56,27 @@ def main():
 
                 if gameState == STATEPLAY:
                     if event.key == pygame.K_LSHIFT:
-                        playState.resetPlay()
                         gameState = STATEMENU  
                 elif gameState == STATEMENU:
                     if event.key == pygame.K_SPACE:
+                        playState.resetPlay()
                         gameState = STATEPLAY
                 elif gameState == STATEOVER:
                     if event.key == pygame.K_SPACE:
+                        playState.resetPlay()
                         gameState = STATEPLAY
                     elif event.key == pygame.K_LSHIFT:
                         gameState = STATEMENU
-            # if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # if gameState == STATEMENU:
-                    # if upgradeLogo.inner.rect.collidepoint(event.pos):
-                        # gameState = STATEUPGRADE
-                        # player.maxHealth = upgradeLogo.onClick(updateStat, player.maxHealth, 100)
 
-        screen.fill("white")
+        screen.fill("grey")
         gameScreen.fill("black")
-        screen.blit(gameScreen, (gameScreenPosX, gameScreenPosY))
 
         # --- PLAYING STATE ---
         if gameState == STATEPLAY:
             keys = pygame.key.get_pressed()
-            playState.update(keys, dt)
-            playState.draw(screen)
+            gameState = playState.update(keys, dt, gameState)
+            playState.draw(gameScreen, screen)
+            screen.blit(gameScreen, (gameScreenPosX, gameScreenPosY))
         # --- MENU STATE ---
         elif gameState == STATEMENU:
             menuState.update(dt, mobTypes)
