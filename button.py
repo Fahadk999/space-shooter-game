@@ -4,7 +4,7 @@ from text import Text
 
 class Button:
     def __init__(self, posX, posY, width=30, height=30) -> None:
-        self.inner = pygame.Rect(
+        self.rect = pygame.Rect(
             posX,
             posY,
             width,
@@ -13,14 +13,14 @@ class Button:
         self.color = "blue"
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.inner)
+        pygame.draw.rect(screen, self.color, self.rect)
 
     def onClick (self, func, *args):
         return func(*args)
 
     def resize (self, width, height):
-        self.inner.width = width
-        self.inner.height = height
+        self.rect.width = width
+        self.rect.height = height
 
 class TextButton(Button):
     def __init__(self, text, posX, posY):

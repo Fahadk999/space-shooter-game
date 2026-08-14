@@ -46,3 +46,4 @@ class Player:
         self.resetHealth()
         self.rect.x = self.screenWidth//2 - self.width//2
         self.rect.y = self.screenHeight - self.height*2.5
+        self.reload = 1500

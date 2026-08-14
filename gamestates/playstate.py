@@ -1,4 +1,5 @@
 import pygame
+from math import floor
 from random import choice
 from player import Player
 from bullet import Bullet
@@ -12,6 +13,9 @@ from button import TextButton
 class PlayState:
     def __init__(self, screenWidth, screenHeight, screenPosX, screenPosY) -> None:
         self.score = 0
+        self.cost = 100
+        self.rate = 1
+        self.rateInc = 0.25
         self.gameState = "PLAY"
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -27,18 +31,24 @@ class PlayState:
         self.enemies = []
         self.mobTypes = (Enemy, Fasts, Heavys)
         # Objects For Upgrade Side
-        self.healthUpTxt = Text("Health", 65+screenWidth, 50)
-        self.healthUpBtn = TextButton("+", screenWidth+150, 50)
+        self.costTxt = Text(f"Cost: {self.cost}", screenWidth+85, 20)
+        self.healthUpTxt = Text("Health", screenWidth+65, 60)
+        self.healthUpBtn = TextButton("+", screenWidth+150, 60)
+        self.reloadUpTxt = Text("Reload", screenWidth+65, 100)
+        self.reloadUpBtn = TextButton("+", screenWidth+150, 100)
+        # bullet speed, damage later...
         # Timers
         self.shootTime = 0
         self.spawnTime = 0
         self.difficultyTime = 0
         self.spawnInterval = 3000
         self.reloadTime = self.player.reload
+        self.minReload = 50
+        self.minSpawnInterval = 300
         self.spawnInterval = 1000
         self.difficultyInterval = 7000
 
-    def update (self, keys, dt, gameState):
+    def update (self, keys, dt, gameState, events):
         self.spawnTime += dt
         self.shootTime += dt
         self.difficultyTime += dt
@@ -59,7 +69,7 @@ class PlayState:
         # Difficulty Scaling
         if self.difficultyTime >= self.difficultyInterval:
             self.spawnInterval -= 100
-            self.spawnInterval = max(self.spawnInterval, self.spawnInterval)
+            self.spawnInterval = max(self.minSpawnInterval, self.spawnInterval)
             self.difficultyTime -= self.difficultyInterval
 
         # Movement Updates
@@ -90,6 +100,25 @@ class PlayState:
         scoreText = f"Score: {self.score}"
         self.scoreDisplay.update(scoreText)
         self.playerHealth.update(f"Health: {self.player.health}")
+
+        # Upgrading
+        def costUp ():
+            self.score -= self.cost
+            self.cost = floor(self.cost*(self.rate + self.rateInc))
+            self.costTxt.update(f"Cost: {self.cost}")
+
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if self.score >= self.cost:
+                    if self.healthUpBtn.inner.rect.collidepoint(event.pos):
+                        self.player.maxHealth = self.upgradeStat(self.player.maxHealth, 100)
+                        self.player.health = self.upgradeStat(self.player.health, 100)
+                        costUp()
+                    if self.reloadUpBtn.inner.rect.collidepoint(event.pos) and self.reloadTime > self.minReload:
+                        self.reloadTime = self.upgradeStat(self.player.reload, -100)
+                        self.player.reload = self.reloadTime
+                        costUp()
+
         return gameState
 
 
@@ -105,8 +134,11 @@ class PlayState:
         self.playerHealth.draw(gameScreen)
         self.scoreDisplay.draw(gameScreen)
         # Drawing Update Objects
+        self.costTxt.draw(mainScreen)
         self.healthUpTxt.draw(mainScreen)
         self.healthUpBtn.draw(mainScreen)
+        self.reloadUpTxt.draw(mainScreen)
+        self.reloadUpBtn.draw(mainScreen)
 
     def resetPlay (self):
         self.player.resetPlayer()
@@ -120,3 +152,8 @@ class PlayState:
         self.difficultyInterval = 17000
         self.enemies.clear()
         self.bullets.clear()
+        self.cost = 100
+        self.costTxt.update(f"Cost: {self.cost}")
+
+    def upgradeStat (self, stat, val):
+        return stat + val

@@ -24,7 +24,7 @@ class OverState:
         self.returnMenuImage = loadImage(
             "assets/texts/pressLshift.png",
             self.scaleFactor,
-            self.screenHeight // 2 - 100,
+            self.screenWidth // 2,
             self.screenHeight - 100
             )
         self.startPromptImage = loadImage(

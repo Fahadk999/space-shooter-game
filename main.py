@@ -41,13 +41,14 @@ def main():
     # For Playing State
     playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
     # For Gameover State
-    overState = OverState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
+    overState = OverState(WIDTH, HEIGHT, 0, 0)
 
     # Game loop
     while running:
         dt = clock.tick(60)
+        events = pygame.event.get()
 
-        for event in pygame.event.get():
+        for event in events: 
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
@@ -74,7 +75,7 @@ def main():
         # --- PLAYING STATE ---
         if gameState == STATEPLAY:
             keys = pygame.key.get_pressed()
-            gameState = playState.update(keys, dt, gameState)
+            gameState = playState.update(keys, dt, gameState, events)
             playState.draw(gameScreen, screen)
             screen.blit(gameScreen, (gameScreenPosX, gameScreenPosY))
         # --- MENU STATE ---
