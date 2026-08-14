@@ -39,7 +39,7 @@ def main():
     # For Menu State
     menuState = MenuState(WIDTH, HEIGHT, 0, 0)
     # For Playing State
-    playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY)
+    playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY, WIDTH)
     # For Gameover State
     overState = OverState(WIDTH, HEIGHT, 0, 0)
 

@@ -11,11 +11,20 @@ from button import TextButton
 
 
 class PlayState:
-    def __init__(self, screenWidth, screenHeight, screenPosX, screenPosY) -> None:
+    def __init__(
+            self,
+            screenWidth,
+            screenHeight,
+            screenPosX,
+            screenPosY,
+            mainScreenWidth,
+        ) -> None:
         self.score = 0
         self.cost = 100
         self.rate = 1
         self.rateInc = 0.25
+        self.bltRateInc = 99
+        self.bltDmgInc = 0
         self.gameState = "PLAY"
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -31,11 +40,14 @@ class PlayState:
         self.enemies = []
         self.mobTypes = (Enemy, Fasts, Heavys)
         # Objects For Upgrade Side
+        offsetBtn = -25
         self.costTxt = Text(f"Cost: {self.cost}", screenWidth+85, 20)
         self.healthUpTxt = Text("Health", screenWidth+65, 60)
-        self.healthUpBtn = TextButton("+", screenWidth+150, 60)
+        self.healthUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 60)
         self.reloadUpTxt = Text("Reload", screenWidth+65, 100)
-        self.reloadUpBtn = TextButton("+", screenWidth+150, 100)
+        self.reloadUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 100)
+        self.bulletDmgTxt = Text("Bullet Damage", screenWidth+180, 140)
+        self.bulletDmgBtn = TextButton("+", mainScreenWidth+offsetBtn, 140)
         # bullet speed, damage later...
         # Timers
         self.shootTime = 0
@@ -45,20 +57,27 @@ class PlayState:
         self.reloadTime = self.player.reload
         self.minReload = 50
         self.minSpawnInterval = 300
-        self.spawnInterval = 1000
         self.difficultyInterval = 7000
 
     def update (self, keys, dt, gameState, events):
         self.spawnTime += dt
         self.shootTime += dt
         self.difficultyTime += dt
+        if self.shootTime > self.reloadTime:
+            self.shootTime = self.reloadTime
         self.player.move(keys)
 
         # Shooting
         if self.shootTime >= self.reloadTime:
             if keys[pygame.K_SPACE]:
-                self.bullets.append(Bullet(self.player.rect.x, self.player.rect.y, self.player.width))
-                self.shootTime -= self.reloadTime
+                self.bullets.append(
+                    Bullet(
+                        self.player.rect.x,
+                        self.player.rect.y,
+                        self.player.width,
+                        self.bltDmgInc
+                        ))
+                self.shootTime = 0
 
         # Enemy Spawning
         if self.spawnTime >= self.spawnInterval:
@@ -118,6 +137,10 @@ class PlayState:
                         self.reloadTime = self.upgradeStat(self.player.reload, -100)
                         self.player.reload = self.reloadTime
                         costUp()
+                    if self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
+                        self.bltDmgInc += self.bltRateInc
+                        costUp()
+
 
         return gameState
 
@@ -139,6 +162,8 @@ class PlayState:
         self.healthUpBtn.draw(mainScreen)
         self.reloadUpTxt.draw(mainScreen)
         self.reloadUpBtn.draw(mainScreen)
+        self.bulletDmgBtn.draw(mainScreen)
+        self.bulletDmgTxt.draw(mainScreen)
 
     def resetPlay (self):
         self.player.resetPlayer()
@@ -148,7 +173,6 @@ class PlayState:
         self.difficultyTime = 0
         self.spawnInterval = 3000
         self.reloadTime = self.player.reload
-        self.spawnInterval = 700
         self.difficultyInterval = 17000
         self.enemies.clear()
         self.bullets.clear()
