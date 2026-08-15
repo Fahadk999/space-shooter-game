@@ -23,8 +23,8 @@ class PlayState:
         self.cost = 100
         self.rate = 1
         self.rateInc = 0.25
-        self.bltRateInc = 20
-        self.bltRateInc = 1
+        self.bltDmgRateInc = 20
+        self.bltSpdRateInc = 1
         self.bltDmgInc = 0
         self.bltSpdInc = 0
         self.gameState = "PLAY"
@@ -52,6 +52,7 @@ class PlayState:
         self.bulletDmgBtn = TextButton("+", mainScreenWidth+offsetBtn, 140)
         self.bulletSpdTxt = Text("Bullet Speed", screenWidth+180, 180)
         self.bulletSpdBtn = TextButton("+", mainScreenWidth+offsetBtn, 180)
+        self.guideTxt = Text("Use Buttons 1-4 to\nupgrade your stats!", screenWidth+180, screenHeight-100)
         # later adding heath for pen and dmg seperate
         # Timers
         self.shootTime = 0
@@ -126,31 +127,39 @@ class PlayState:
         self.playerHealth.update(f"Health: {self.player.health}")
 
         # Upgrading
-        def costUp ():
+        def applyUpgrade(incVal):
             self.score -= self.cost
-            self.cost = floor(self.cost*(self.rate + self.rateInc))
+            self.cost = floor(self.cost * (self.rate + self.rateInc))
             self.costTxt.update(f"Cost: {self.cost}")
+            return incVal
 
         for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if self.score >= self.cost:
-                    if self.healthUpBtn.inner.rect.collidepoint(event.pos):
-                        self.player.maxHealth = self.upgradeStat(self.player.maxHealth, 100)
-                        self.player.health = self.upgradeStat(self.player.health, 100)
-                        costUp()
-                    if self.reloadUpBtn.inner.rect.collidepoint(event.pos) and self.reloadTime > self.minReload:
-                        self.reloadTime = self.upgradeStat(self.player.reload, -100)
+            if self.score >= self.cost:
+                # KEYBOARD SHORTCUTS
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        self.player.maxHealth += applyUpgrade(100)
+                        self.player.health += 100
+                    elif event.key == pygame.K_2 and self.reloadTime > self.minReload:
+                        self.reloadTime = max(self.minReload, self.reloadTime - applyUpgrade(100))
                         self.player.reload = self.reloadTime
-                        costUp()
-                    if self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
-                        self.bltDmgInc += self.bltRateInc
-                        costUp()
-                    if self.bulletSpdBtn.inner.rect.colliderect(event.pos):
-                        self.bltSpdInc += self.bltRateInc
-                        costUp()
+                    elif event.key == pygame.K_3:
+                        self.bltDmgInc += applyUpgrade(self.bltDmgRateInc)
+                    elif event.key == pygame.K_4:
+                        self.bltSpdInc += applyUpgrade(self.bltSpdRateInc)
 
-
-
+                # MOUSE CLICKS
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if self.healthUpBtn.inner.rect.collidepoint(event.pos):
+                        self.player.maxHealth += applyUpgrade(100)
+                        self.player.health += 100
+                    elif self.reloadUpBtn.inner.rect.collidepoint(event.pos) and self.reloadTime > self.minReload:
+                        self.reloadTime = max(self.minReload, self.reloadTime - applyUpgrade(100))
+                        self.player.reload = self.reloadTime
+                    elif self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
+                        self.bltDmgInc += applyUpgrade(self.bltDmgRateInc)
+                    elif self.bulletSpdBtn.inner.rect.collidepoint(event.pos):
+                        self.bltSpdInc += applyUpgrade(self.bltSpdRateInc)
         return gameState
 
 
@@ -176,6 +185,8 @@ class PlayState:
         self.bulletSpdTxt.draw(mainScreen)
         self.bulletSpdBtn.draw(mainScreen)
 
+        self.guideTxt.draw(mainScreen)
+
     def resetPlay (self):
         self.player.resetPlayer()
         self.score = 0
@@ -190,6 +201,3 @@ class PlayState:
         self.bullets.clear()
         self.cost = 100
         self.costTxt.update(f"Cost: {self.cost}")
-
-    def upgradeStat (self, stat, val):
-        return stat + val

@@ -28,11 +28,28 @@ class Player:
         self.color = "white"
 
     def move (self, keys):
-        if keys[pygame.K_LEFT] and self.rect.x > -self.width/2: self.rect.x -= self.speed 
-        if keys[pygame.K_RIGHT] and self.rect.x < self.screenWidth-self.width/2: self.rect.x += self.speed 
-        if keys[pygame.K_UP] and self.rect.y > 0: self.rect.y -= self.speed 
-        if keys[pygame.K_DOWN] and self.rect.y < self.screenHeight-self.height: self.rect.y += self.speed 
+        dx = 0
+        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+            dx -= self.speed
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            dx += self.speed
 
+        dy = 0
+        if keys[pygame.K_UP] or keys[pygame.K_w]:
+            dy -= self.speed
+        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            dy += self.speed
+
+        self.rect.x += dx
+        self.rect.y += dy
+
+        half_width = self.rect.width / 2
+        half_height = self.rect.height / 2
+        # idk how this min max works :/ chat gpt recommend
+        self.rect.left = max(-half_width, self.rect.left)
+        self.rect.right = min(self.screenWidth + half_width, self.rect.right)
+        self.rect.top = max(-half_height, self.rect.top)
+        self.rect.bottom = min(self.screenHeight + half_height, self.rect.bottom)
         self.healthBar.update(self)
 
     def draw (self, screen):
