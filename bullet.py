@@ -1,12 +1,12 @@
 import pygame
 
 class Bullet:
-    def __init__(self, playerX, playerY, playerWidth, incBy=0):
+    def __init__(self, playerX, playerY, playerWidth, dmgIncBy=0, spdIncBy=0):
         self.name = "bullet"
         self.defaultSpeed = 7
-        self.speed = self.defaultSpeed
+        self.speed = self.defaultSpeed + spdIncBy
         self.defaultHealth = 33
-        self.health = self.defaultHealth + incBy
+        self.health = self.defaultHealth + dmgIncBy
         self.color = "blue"
         self.width = 15
         self.height = 45

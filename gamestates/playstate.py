@@ -23,8 +23,10 @@ class PlayState:
         self.cost = 100
         self.rate = 1
         self.rateInc = 0.25
-        self.bltRateInc = 99
+        self.bltRateInc = 20
+        self.bltRateInc = 1
         self.bltDmgInc = 0
+        self.bltSpdInc = 0
         self.gameState = "PLAY"
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -48,7 +50,9 @@ class PlayState:
         self.reloadUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 100)
         self.bulletDmgTxt = Text("Bullet Damage", screenWidth+180, 140)
         self.bulletDmgBtn = TextButton("+", mainScreenWidth+offsetBtn, 140)
-        # bullet speed, damage later...
+        self.bulletSpdTxt = Text("Bullet Speed", screenWidth+180, 180)
+        self.bulletSpdBtn = TextButton("+", mainScreenWidth+offsetBtn, 180)
+        # later adding heath for pen and dmg seperate
         # Timers
         self.shootTime = 0
         self.spawnTime = 0
@@ -57,7 +61,7 @@ class PlayState:
         self.reloadTime = self.player.reload
         self.minReload = 50
         self.minSpawnInterval = 300
-        self.difficultyInterval = 7000
+        self.difficultyInterval = 3000
 
     def update (self, keys, dt, gameState, events):
         self.spawnTime += dt
@@ -75,7 +79,8 @@ class PlayState:
                         self.player.rect.x,
                         self.player.rect.y,
                         self.player.width,
-                        self.bltDmgInc
+                        self.bltDmgInc,
+                        self.bltSpdInc
                         ))
                 self.shootTime = 0
 
@@ -140,6 +145,10 @@ class PlayState:
                     if self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
                         self.bltDmgInc += self.bltRateInc
                         costUp()
+                    if self.bulletSpdBtn.inner.rect.colliderect(event.pos):
+                        self.bltSpdInc += self.bltRateInc
+                        costUp()
+
 
 
         return gameState
@@ -164,16 +173,19 @@ class PlayState:
         self.reloadUpBtn.draw(mainScreen)
         self.bulletDmgBtn.draw(mainScreen)
         self.bulletDmgTxt.draw(mainScreen)
+        self.bulletSpdTxt.draw(mainScreen)
+        self.bulletSpdBtn.draw(mainScreen)
 
     def resetPlay (self):
         self.player.resetPlayer()
         self.score = 0
         self.shootTime = 0
         self.spawnTime = 0
+        self.bltDmgInc = 0
         self.difficultyTime = 0
         self.spawnInterval = 3000
         self.reloadTime = self.player.reload
-        self.difficultyInterval = 17000
+        self.difficultyInterval = 3000
         self.enemies.clear()
         self.bullets.clear()
         self.cost = 100
