@@ -5,6 +5,7 @@ from Mobs.heavys import Heavys
 from gamestates.menustate import MenuState
 from gamestates.playstate import PlayState
 from gamestates.overstate import OverState
+from database import ScoreDatabase
 
 def main():
     # for smaller screens use display other than 0, eg: 1
@@ -23,7 +24,7 @@ def main():
     STATEPLAY = "PLAY"
     STATEOVER = "OVER"
     # STATEUPGRADE = "UPGRADE" for later
-    gameState = STATEPLAY
+    gameState = STATEOVER
 
     # Initializing Basic Pygame
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
@@ -41,7 +42,9 @@ def main():
     # For Playing State
     playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY, WIDTH)
     # For Gameover State
-    overState = OverState(WIDTH, HEIGHT, 0, 0)
+    overState = OverState(WIDTH, HEIGHT, 0, 0, playState.score)
+    # Database init
+    db = ScoreDatabase()
 
     # Game loop
     while running:
@@ -76,6 +79,11 @@ def main():
         if gameState == STATEPLAY:
             keys = pygame.key.get_pressed()
             gameState = playState.update(keys, dt, gameState, events)
+            if gameState == STATEOVER:
+                db.addScore("PLAYER", playState.score)
+                topScores = db.getTopScores(5)
+                overState.updateScore(playState.score, topScores)
+
             playState.draw(gameScreen, screen)
             screen.blit(gameScreen, (gameScreenPosX, gameScreenPosY))
         # --- MENU STATE ---
