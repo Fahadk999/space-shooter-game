@@ -37,3 +37,6 @@ class ImageButton(Button):
 
     def draw (self, screen):
         self.inner.draw(screen)
+
+    def resizeImg(self, width, height):
+        self.inner.resize(width, height)

@@ -9,6 +9,8 @@ from Mobs.fasts import Fasts
 from Mobs.heavys import Heavys
 from button import TextButton
 
+# adding rounds next, every round is 20 sec, then boss fight
+# for every round + 1 prestige point
 
 class PlayState:
     def __init__(
@@ -27,7 +29,6 @@ class PlayState:
         self.bltSpdRateInc = 1
         self.bltDmgInc = 0
         self.bltSpdInc = 0
-        self.gameState = "PLAY"
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
         self.screenPosX = screenPosX

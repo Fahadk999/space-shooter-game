@@ -11,3 +11,10 @@ class loadImage:
 
     def draw (self, screen):
         screen.blit(self.image, self.rect)
+
+    def resize (self, width, height):
+        prevCenter = self.rect.center
+        self.image = pygame.transform.scale(
+            self.rawImage, (width, height)
+        )
+        self.rect = self.image.get_rect(center=prevCenter)

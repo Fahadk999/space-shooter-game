@@ -4,8 +4,9 @@ from healthbar import StaticHealthBar
 class Player:
     def __init__(self, screenWidth, screenHeight):
         self.name = "player"
-        self.maxHealth = 30
-        self.health = self.maxHealth
+        self.defaultHealth = 30
+        self.maxHealth = self.defaultHealth
+        self.health = self.defaultHealth
         self.reload = 1500
         self.screenWidth = screenWidth
         self.screenHeight = screenHeight
@@ -57,7 +58,8 @@ class Player:
         self.healthBar.draw(screen)
 
     def resetHealth (self):
-        self.health = self.maxHealth
+        self.maxHealth = self.defaultHealth
+        self.health = self.defaultHealth
 
     def resetPlayer (self):
         self.resetHealth()
