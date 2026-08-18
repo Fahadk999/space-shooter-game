@@ -5,7 +5,6 @@ from Mobs.heavys import Heavys
 from gamestates.menustate import MenuState
 from gamestates.playstate import PlayState
 from gamestates.overstate import OverState
-from gamestates.prestigestate import PrestigeState
 from database import ScoreDatabase
 
 def main():
@@ -18,8 +17,7 @@ def main():
     STATEMENU = "MENU"
     STATEPLAY = "PLAY"
     STATEOVER = "OVER"
-    STATEPRESTIGE = "PRESTIGE"
-    gameState = STATEPRESTIGE
+    gameState = STATEMENU
 
     # Initializing Basic Pygame
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.NOFRAME)
@@ -38,8 +36,6 @@ def main():
     playState = PlayState(GAMEWIDTH, GAMEHEIGHT, gameScreenPosX, gameScreenPosY, WIDTH)
     # For Gameover State
     overState = OverState(WIDTH, HEIGHT, 0, 0, playState.score)
-    # For Prestige State
-    presitgeState = PrestigeState(WIDTH, HEIGHT)
     # Database init
     db = ScoreDatabase()
 
@@ -85,15 +81,11 @@ def main():
             screen.blit(gameScreen, (gameScreenPosX, gameScreenPosY))
         # --- MENU STATE ---
         elif gameState == STATEMENU:
-            gameState = menuState.update(dt, mobTypes, gameState, events)
+            gameState = menuState.update(dt, mobTypes)
             menuState.draw(screen)
         # --- GAME OVER STATE ---
         elif gameState == STATEOVER:
             overState.draw(screen)
-        # --- PRESTIGE STATE ---
-        elif gameState == STATEPRESTIGE:
-            presitgeState.update(dt, events)
-            presitgeState.draw(screen)
 
         pygame.display.flip()
 

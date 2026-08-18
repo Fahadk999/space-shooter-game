@@ -10,7 +10,6 @@ from Mobs.heavys import Heavys
 from button import TextButton
 
 # adding rounds next, every round is 20 sec, then boss fight
-# for every round + 1 prestige point
 
 class PlayState:
     def __init__(
@@ -21,7 +20,9 @@ class PlayState:
             screenPosY,
             mainScreenWidth,
         ) -> None:
+        self.credit = 0
         self.score = 0
+        self.scoreMultiplier = 10 
         self.cost = 100
         self.rate = 1
         self.rateInc = 0.25
@@ -35,16 +36,19 @@ class PlayState:
         self.screenPosY = screenPosY
 
         # Objects For Gamescreen
-        self.scoreText = f"Score: {self.score}"
+        self.creditString = f"credit: {self.credit}"
+        self.scoreString = f"score: {int(self.score)}"
         self.player = Player(self.screenWidth, self.screenHeight)
         self.bullets = []
         self.playerHealth = Text(self.player.health, 30, 30)
-        self.scoreDisplay = Text(self.scoreText, 100, 100)
+        self.creditDisplay = Text(self.creditString, 100, 100)
         self.enemies = []
         self.mobTypes = (Enemy, Fasts, Heavys)
+        
         # Objects For Upgrade Side
         offsetBtn = -25
         self.costTxt = Text(f"Cost: {self.cost}", screenWidth+85, 20)
+        self.scoreTxt = Text(self.scoreString, 100, 200)
         self.healthUpTxt = Text("Health", screenWidth+65, 60)
         self.healthUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 60)
         self.reloadUpTxt = Text("Reload", screenWidth+65, 100)
@@ -54,7 +58,7 @@ class PlayState:
         self.bulletSpdTxt = Text("Bullet Speed", screenWidth+180, 180)
         self.bulletSpdBtn = TextButton("+", mainScreenWidth+offsetBtn, 180)
         self.guideTxt = Text("Use Buttons 1-4 to\nupgrade your stats!", screenWidth+180, screenHeight-100)
-        # later adding heath for pen and dmg seperate
+        
         # Timers
         self.shootTime = 0
         self.spawnTime = 0
@@ -65,7 +69,10 @@ class PlayState:
         self.minSpawnInterval = 300
         self.difficultyInterval = 3000
 
-    def update (self, keys, dt, gameState, events):
+    def update(self, keys, dt, gameState, events):
+        self.score += (dt / 1000) * self.scoreMultiplier
+        self.scoreTxt.update(f"score: {int(self.score)}")
+
         self.spawnTime += dt
         self.shootTime += dt
         self.difficultyTime += dt
@@ -83,7 +90,7 @@ class PlayState:
                         self.player.width,
                         self.bltDmgInc,
                         self.bltSpdInc
-                        ))
+                    ))
                 self.shootTime = 0
 
         # Enemy Spawning
@@ -106,13 +113,13 @@ class PlayState:
             enemy.update()
             if enemy.collide(self.player):
                 self.playerHealth.update(self.player.health)
-                self.score += enemy.points
 
-        # Bullet-Enemy Collisions
+        # Bullet-Enemy Collisions 
         for b in self.bullets:
             for enemy in self.enemies:
                 if enemy.collide(b):
-                    self.score += enemy.points
+                    self.credit += enemy.points
+                    self.score += enemy.points * 2 
 
         # Clean Up Offscreen/Dead Entities
         self.bullets = [b for b in self.bullets if b.rect.y + b.height >= 0 and b.health > 0]
@@ -123,19 +130,19 @@ class PlayState:
             gameState = "OVER"
             return gameState
 
-        scoreText = f"Score: {self.score}"
-        self.scoreDisplay.update(scoreText)
+        creditString = f"credit: {self.credit}"
+        self.creditDisplay.update(creditString)
         self.playerHealth.update(f"Health: {self.player.health}")
 
         # Upgrading
         def applyUpgrade(incVal):
-            self.score -= self.cost
+            self.credit -= self.cost
             self.cost = floor(self.cost * (self.rate + self.rateInc))
             self.costTxt.update(f"Cost: {self.cost}")
             return incVal
 
         for event in events:
-            if self.score >= self.cost:
+            if self.credit >= self.cost:
                 # KEYBOARD SHORTCUTS
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_1:
@@ -163,8 +170,7 @@ class PlayState:
                         self.bltSpdInc += applyUpgrade(self.bltSpdRateInc)
         return gameState
 
-
-    def draw (self, gameScreen, mainScreen):
+    def draw(self, gameScreen, mainScreen):
         # Draw Game Objects
         for enemy in self.enemies:
             enemy.draw(gameScreen)
@@ -174,7 +180,9 @@ class PlayState:
         self.player.draw(gameScreen)
 
         self.playerHealth.draw(gameScreen)
-        self.scoreDisplay.draw(gameScreen)
+        self.creditDisplay.draw(gameScreen)
+        self.scoreTxt.draw(gameScreen)
+
         # Drawing Update Objects
         self.costTxt.draw(mainScreen)
         self.healthUpTxt.draw(mainScreen)
@@ -188,12 +196,14 @@ class PlayState:
 
         self.guideTxt.draw(mainScreen)
 
-    def resetPlay (self):
+    def resetPlay(self):
         self.player.resetPlayer()
+        self.credit = 0
         self.score = 0
         self.shootTime = 0
         self.spawnTime = 0
         self.bltDmgInc = 0
+        self.bltSpdInc = 0
         self.difficultyTime = 0
         self.spawnInterval = 3000
         self.reloadTime = self.player.reload
@@ -202,3 +212,4 @@ class PlayState:
         self.bullets.clear()
         self.cost = 100
         self.costTxt.update(f"Cost: {self.cost}")
+        self.scoreTxt.update("score: 0")
