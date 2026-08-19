@@ -71,7 +71,7 @@ class PlayState:
         self.enemyStrongTimer = 0
         self.spawnInterval = 3000
         self.enemyStrongInterval = 10000
-        self.regenInterval = 5000
+        self.regenInterval = 10000
         self.reloadTime = self.player.reload
         self.minReload = 50
         self.minSpawnInterval = 300

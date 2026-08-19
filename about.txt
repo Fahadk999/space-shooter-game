@@ -6,7 +6,8 @@ add boss
 add a difficulty scaling, variable to keep track of cur diff lvl
 for got ot add sounds
 turrent
-auto regen after 5 sec no contact
+auto regen after 10 sec no contact
+add regen upgrade also
 auto fire no need to click space
 health gets more of mobs some way
 idle animation for the start and game over
