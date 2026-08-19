@@ -38,3 +38,6 @@ class Enemy:
     def update (self):
         self.rect.y += self.baseSpeed
 
+    def healthUp (self):
+        self.health += int(self.health * 0.25)
+

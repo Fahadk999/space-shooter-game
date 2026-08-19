@@ -12,7 +12,7 @@ class Bullet:
         self.height = 45
         self.rect = pygame.Rect(
             playerX + playerWidth/2 - self.width/2,
-            playerY,
+            playerY + 5,
             self.width,
             self.height
         )

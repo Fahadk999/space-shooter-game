@@ -24,6 +24,7 @@ class PlayState:
         self.score = 0
         self.scoreMultiplier = 10 
         self.cost = 100
+        self.regenVal = 15
         self.rate = 1
         self.rateInc = 0.25
         self.bltDmgRateInc = 20
@@ -35,35 +36,42 @@ class PlayState:
         self.screenPosX = screenPosX
         self.screenPosY = screenPosY
 
+        self.enemyHealthBuffs = 0
+
         # Objects For Gamescreen
         self.creditString = f"credit: {self.credit}"
         self.scoreString = f"score: {int(self.score)}"
         self.player = Player(self.screenWidth, self.screenHeight)
         self.bullets = []
-        self.playerHealth = Text(self.player.health, 30, 30)
-        self.creditDisplay = Text(self.creditString, 100, 100)
+        self.playerHealth = Text(self.player.health, 90, 30)
+        self.creditDisplay = Text(self.creditString, screenWidth-100, 30)
+
         self.enemies = []
         self.mobTypes = (Enemy, Fasts, Heavys)
         
         # Objects For Upgrade Side
         offsetBtn = -25
         self.costTxt = Text(f"Cost: {self.cost}", screenWidth+85, 20)
-        self.scoreTxt = Text(self.scoreString, 100, 200)
+        self.scoreTxt = Text(self.scoreString, screenWidth//2, 30)
         self.healthUpTxt = Text("Health", screenWidth+65, 60)
         self.healthUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 60)
-        self.reloadUpTxt = Text("Reload", screenWidth+65, 100)
+        self.reloadUpTxt = Text("Reload", screenWidth+66, 100)
         self.reloadUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 100)
-        self.bulletDmgTxt = Text("Bullet Damage", screenWidth+180, 140)
+        self.bulletDmgTxt = Text("Bullet Damage", screenWidth+127, 140)
         self.bulletDmgBtn = TextButton("+", mainScreenWidth+offsetBtn, 140)
-        self.bulletSpdTxt = Text("Bullet Speed", screenWidth+180, 180)
+        self.bulletSpdTxt = Text("Bullet Speed", screenWidth+112, 180)
         self.bulletSpdBtn = TextButton("+", mainScreenWidth+offsetBtn, 180)
-        self.guideTxt = Text("Use Buttons 1-4 to\nupgrade your stats!", screenWidth+180, screenHeight-100)
+        self.guideTxt = Text("Use Buttons 1-4\nor click the + to\nupgrade your stats!", screenWidth+180, screenHeight-100)
         
         # Timers
+        self.regenTimer = 0
         self.shootTime = 0
         self.spawnTime = 0
         self.difficultyTime = 0
+        self.enemyStrongTimer = 0
         self.spawnInterval = 3000
+        self.enemyStrongInterval = 10000
+        self.regenInterval = 5000
         self.reloadTime = self.player.reload
         self.minReload = 50
         self.minSpawnInterval = 300
@@ -76,27 +84,42 @@ class PlayState:
         self.spawnTime += dt
         self.shootTime += dt
         self.difficultyTime += dt
+        self.enemyStrongTimer += dt  
+        self.regenTimer += dt
+
         if self.shootTime > self.reloadTime:
             self.shootTime = self.reloadTime
         self.player.move(keys)
 
         # Shooting
         if self.shootTime >= self.reloadTime:
-            if keys[pygame.K_SPACE]:
-                self.bullets.append(
-                    Bullet(
-                        self.player.rect.x,
-                        self.player.rect.y,
-                        self.player.width,
-                        self.bltDmgInc,
-                        self.bltSpdInc
-                    ))
-                self.shootTime = 0
+            self.bullets.append(
+                Bullet(
+                    self.player.rect.x,
+                    self.player.rect.y,
+                    self.player.width,
+                    self.bltDmgInc,
+                    self.bltSpdInc
+                ))
+            self.shootTime = 0
+
+        # Enemy Strength Up 
+        if self.enemyStrongTimer >= self.enemyStrongInterval:
+            self.enemyStrongTimer -= self.enemyStrongInterval
+            self.enemyHealthBuffs += 1  
+
+            for e in self.enemies:
+                e.healthUp()
 
         # Enemy Spawning
         if self.spawnTime >= self.spawnInterval:
             chosenType = choice(self.mobTypes)
-            self.enemies.append(chosenType(self.screenWidth, self.screenPosX, self.screenPosY))
+            newEnemy = chosenType(self.screenWidth, self.screenPosX, self.screenPosY)
+
+            for _ in range(self.enemyHealthBuffs):
+                newEnemy.healthUp()
+
+            self.enemies.append(newEnemy)
             self.spawnTime -= self.spawnInterval
 
         # Difficulty Scaling
@@ -112,6 +135,8 @@ class PlayState:
         for enemy in self.enemies:
             enemy.update()
             if enemy.collide(self.player):
+                self.credit += enemy.points
+                self.score += enemy.points * 2 
                 self.playerHealth.update(self.player.health)
 
         # Bullet-Enemy Collisions 
@@ -129,6 +154,13 @@ class PlayState:
         if self.player.health <= 0:
             gameState = "OVER"
             return gameState
+
+        # Player Health Regen
+        if self.regenTimer >= self.regenInterval:
+            self.player.health = min(self.player.health+self.regenVal, self.player.maxHealth)
+            self.regenTimer -= self.regenInterval
+
+
 
         creditString = f"credit: {self.credit}"
         self.creditDisplay.update(creditString)
@@ -164,7 +196,7 @@ class PlayState:
                     elif self.reloadUpBtn.inner.rect.collidepoint(event.pos) and self.reloadTime > self.minReload:
                         self.reloadTime = max(self.minReload, self.reloadTime - applyUpgrade(100))
                         self.player.reload = self.reloadTime
-                    elif self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
+                    elif event.bulletDmgBtn.inner.rect.collidepoint(event.pos) if hasattr(event, 'bulletDmgBtn') else self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
                         self.bltDmgInc += applyUpgrade(self.bltDmgRateInc)
                     elif self.bulletSpdBtn.inner.rect.collidepoint(event.pos):
                         self.bltSpdInc += applyUpgrade(self.bltSpdRateInc)
@@ -205,6 +237,9 @@ class PlayState:
         self.bltDmgInc = 0
         self.bltSpdInc = 0
         self.difficultyTime = 0
+        self.enemyStrongTimer = 0
+        self.regenTimer = 0
+        self.enemyHealthBuffs = 0 
         self.spawnInterval = 3000
         self.reloadTime = self.player.reload
         self.difficultyInterval = 3000

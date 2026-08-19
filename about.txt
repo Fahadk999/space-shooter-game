@@ -1,6 +1,12 @@
 To do list:
-level system when killing enemy gives exp: done
 upgrades system after each wave
 bullet vairation, curving, auto aim, burst fire and more
-the more the enetity pass the higher hp the boss is
+add boss
+    the more the enetity pass the higher hp the boss is
 add a difficulty scaling, variable to keep track of cur diff lvl
+for got ot add sounds
+turrent
+auto regen after 5 sec no contact
+auto fire no need to click space
+health gets more of mobs some way
+idle animation for the start and game over

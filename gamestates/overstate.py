@@ -24,7 +24,7 @@ class OverState:
             self.screenPosY + self.screenHeight // 3
             )
         self.finalScore = Text(
-            f"Score: {self.score}",
+            f"Score: {int(self.score)}",
             self.screenWidth // 2,
             self.gameOverImage.rect.y + 130
             )
@@ -49,14 +49,14 @@ class OverState:
 
     def updateScore (self, newScore, topScores):
         self.score = newScore
-        self.finalScore.update(f"Score: {newScore}")
+        self.finalScore.update(f"Score: {int(newScore)}")
 
         self.lbTexts.clear()
         startY = self.lbHeader.rect.y + 50
         lineSpacing = 35
 
         for i, (name, score) in enumerate(topScores):
-            entryStr = f"{i+1}. {name} - {score}"
+            entryStr = f"{i+1}. {name} - {int(score)}"
             entryY = startY + (i * lineSpacing)
 
             scoreTxt = Text(entryStr, self.screenWidth//2, entryY)
