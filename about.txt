@@ -4,10 +4,6 @@ bullet vairation, curving, auto aim, burst fire and more
 add boss
     the more the enetity pass the higher hp the boss is
 add a difficulty scaling, variable to keep track of cur diff lvl
-for got ot add sounds
-turrent
-auto regen after 10 sec no contact
 add regen upgrade also
-auto fire no need to click space
-health gets more of mobs some way
-idle animation for the start and game over
+add golden glow for 1 sec when upgrade
+add particle effect

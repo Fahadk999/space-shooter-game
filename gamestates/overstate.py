@@ -72,3 +72,6 @@ class OverState:
 
         self.startPromptImage.draw(screen)
         self.returnMenuImage.draw(screen)
+
+    def update (self, dt):
+        self.gameOverImage.idleAnimationY(dt, 1, 50)

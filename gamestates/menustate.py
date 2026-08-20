@@ -18,6 +18,7 @@ class MenuState():
 
     def update(self, dt, mobTypes):
         self.spawnTime += dt
+        self.titleImage.idleAnimationY(dt, 1, 50)
         if self.spawnTime >= self.spawnInterval:
             chosenType = choice(mobTypes)
             chosenMob = chosenType(self.screenWidth, self.screenPosX, self.screenPosY)

@@ -6,6 +6,7 @@ from gamestates.menustate import MenuState
 from gamestates.playstate import PlayState
 from gamestates.overstate import OverState
 from database import ScoreDatabase
+from soundloader import LoadMusic
 
 def main():
     # Screen Resolution
@@ -25,6 +26,7 @@ def main():
     gameScreenPosX, gameScreenPosY = 0, 0
     clock = pygame.time.Clock()
     running = True
+    music = LoadMusic("audio/backgroundmusic.wav", 0.1)
 
     # Variables being used
     mobTypes = (Enemy, Fasts, Heavys)
@@ -39,6 +41,7 @@ def main():
     # Database init
     db = ScoreDatabase()
 
+    music.play()
     # Game loop
     while running:
         dt = clock.tick(60)
@@ -85,6 +88,7 @@ def main():
             menuState.draw(screen)
         # --- GAME OVER STATE ---
         elif gameState == STATEOVER:
+            overState.update(dt)
             overState.draw(screen)
 
         pygame.display.flip()

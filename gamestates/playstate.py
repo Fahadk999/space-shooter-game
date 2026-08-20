@@ -8,8 +8,7 @@ from Mobs.enemy import Enemy
 from Mobs.fasts import Fasts
 from Mobs.heavys import Heavys
 from button import TextButton
-
-# adding rounds next, every round is 20 sec, then boss fight
+from soundloader import LoadSound
 
 class PlayState:
     def __init__(
@@ -28,6 +27,7 @@ class PlayState:
         self.rate = 1
         self.rateInc = 0.25
         self.bltDmgRateInc = 20
+        self.reloadRateDec = 200
         self.bltSpdRateInc = 1
         self.bltDmgInc = 0
         self.bltSpdInc = 0
@@ -35,8 +35,12 @@ class PlayState:
         self.screenHeight = screenHeight
         self.screenPosX = screenPosX
         self.screenPosY = screenPosY
-
         self.enemyHealthBuffs = 0
+        self.healthLvl = 0
+        self.reloadLvl = 0
+        self.bulletDmgLvl = 0
+        self.bulletSpeedLvl = 0
+        self.regenLvl = 0
 
         # Objects For Gamescreen
         self.creditString = f"credit: {self.credit}"
@@ -46,21 +50,36 @@ class PlayState:
         self.playerHealth = Text(self.player.health, 90, 30)
         self.creditDisplay = Text(self.creditString, screenWidth-100, 30)
 
+        # Sound Effects
+        self.laserSound = LoadSound("audio/laserSmall.wav", 0.3)
+        self.enemyHitSound = LoadSound("audio/explosion.wav", 0.1)
+        self.upgradeSound = LoadSound("audio/upgrade.wav", 0.1)
+        self.playerHitSound = LoadSound("audio/explosion2.wav", 0.1)
+
         self.enemies = []
         self.mobTypes = (Enemy, Fasts, Heavys)
         
         # Objects For Upgrade Side
-        offsetBtn = -25
+        offsetBtn = -55
+        offsetLvl = -15
         self.costTxt = Text(f"Cost: {self.cost}", screenWidth+85, 20)
         self.scoreTxt = Text(self.scoreString, screenWidth//2, 30)
         self.healthUpTxt = Text("Health", screenWidth+65, 60)
         self.healthUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 60)
+        self.healthLvlTxt = Text(str(self.healthLvl), mainScreenWidth+offsetLvl, 62)
+
         self.reloadUpTxt = Text("Reload", screenWidth+66, 100)
         self.reloadUpBtn = TextButton("+", mainScreenWidth+offsetBtn, 100)
+        self.reloadLvlTxt = Text(str(self.reloadLvl), mainScreenWidth+offsetLvl, 102)
+
         self.bulletDmgTxt = Text("Bullet Damage", screenWidth+127, 140)
         self.bulletDmgBtn = TextButton("+", mainScreenWidth+offsetBtn, 140)
+        self.bulletDmgLvlTxt = Text(str(self.bulletDmgLvl), mainScreenWidth+offsetLvl, 142)
+
         self.bulletSpdTxt = Text("Bullet Speed", screenWidth+112, 180)
         self.bulletSpdBtn = TextButton("+", mainScreenWidth+offsetBtn, 180)
+        self.bulletSpdLvlTxt = Text(str(self.bulletSpeedLvl), mainScreenWidth+offsetLvl, 182)
+
         self.guideTxt = Text("Use Buttons 1-4\nor click the + to\nupgrade your stats!", screenWidth+180, screenHeight-100)
         
         # Timers
@@ -70,12 +89,44 @@ class PlayState:
         self.difficultyTime = 0
         self.enemyStrongTimer = 0
         self.spawnInterval = 3000
-        self.enemyStrongInterval = 10000
+        self.enemyStrongInterval = 15000
         self.regenInterval = 10000
         self.reloadTime = self.player.reload
         self.minReload = 50
         self.minSpawnInterval = 300
         self.difficultyInterval = 3000
+
+    def applyUpgrade(self, incVal, lvl):
+        self.credit -= self.cost
+        self.cost = floor(self.cost * (self.rate + self.rateInc))
+        self.costTxt.update(f"Cost: {self.cost}")
+        self.upgradeSound.play()
+        return incVal * (lvl + 1)
+
+    def upgradeHealth(self):
+        boost = self.applyUpgrade(100, self.healthLvl)
+        self.player.maxHealth += boost
+        self.player.health += boost
+        self.healthLvl += 1
+        self.healthLvlTxt.update(str(self.healthLvl))
+
+    def upgradeReload(self):
+        if self.reloadTime > self.minReload:
+            reduction = self.applyUpgrade(self.reloadRateDec, self.reloadLvl)
+            self.reloadTime = max(self.minReload, self.reloadTime - reduction)
+            self.player.reload = self.reloadTime
+            self.reloadLvl += 1
+            self.reloadLvlTxt.update(str(self.reloadLvl))
+
+    def upgradeDamage(self):
+        self.bltDmgInc += self.applyUpgrade(self.bltDmgRateInc, self.bulletDmgLvl)
+        self.bulletDmgLvl += 1
+        self.bulletDmgLvlTxt.update(str(self.bulletDmgLvl))
+
+    def upgradeSpeed(self):
+        self.bltSpdInc += self.applyUpgrade(self.bltSpdRateInc, self.bulletSpeedLvl)
+        self.bulletSpeedLvl += 1
+        self.bulletSpdLvlTxt.update(str(self.bulletSpeedLvl))
 
     def update(self, keys, dt, gameState, events):
         self.score += (dt / 1000) * self.scoreMultiplier
@@ -100,7 +151,9 @@ class PlayState:
                     self.player.width,
                     self.bltDmgInc,
                     self.bltSpdInc
-                ))
+                )
+            )
+            self.laserSound.play()
             self.shootTime = 0
 
         # Enemy Strength Up 
@@ -135,6 +188,8 @@ class PlayState:
         for enemy in self.enemies:
             enemy.update()
             if enemy.collide(self.player):
+                self.playerHitSound.play()
+                self.regenTimer -= self.regenInterval
                 self.credit += enemy.points
                 self.score += enemy.points * 2 
                 self.playerHealth.update(self.player.health)
@@ -143,6 +198,7 @@ class PlayState:
         for b in self.bullets:
             for enemy in self.enemies:
                 if enemy.collide(b):
+                    self.enemyHitSound.play()
                     self.credit += enemy.points
                     self.score += enemy.points * 2 
 
@@ -157,49 +213,37 @@ class PlayState:
 
         # Player Health Regen
         if self.regenTimer >= self.regenInterval:
-            self.player.health = min(self.player.health+self.regenVal, self.player.maxHealth)
+            self.player.health = min(self.player.health + self.regenVal, self.player.maxHealth)
             self.regenTimer -= self.regenInterval
-
-
 
         creditString = f"credit: {self.credit}"
         self.creditDisplay.update(creditString)
         self.playerHealth.update(f"Health: {self.player.health}")
 
-        # Upgrading
-        def applyUpgrade(incVal):
-            self.credit -= self.cost
-            self.cost = floor(self.cost * (self.rate + self.rateInc))
-            self.costTxt.update(f"Cost: {self.cost}")
-            return incVal
-
+        # Upgrading Event Handling
         for event in events:
             if self.credit >= self.cost:
                 # KEYBOARD SHORTCUTS
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_1:
-                        self.player.maxHealth += applyUpgrade(100)
-                        self.player.health += 100
-                    elif event.key == pygame.K_2 and self.reloadTime > self.minReload:
-                        self.reloadTime = max(self.minReload, self.reloadTime - applyUpgrade(100))
-                        self.player.reload = self.reloadTime
+                        self.upgradeHealth()
+                    elif event.key == pygame.K_2:
+                        self.upgradeReload()
                     elif event.key == pygame.K_3:
-                        self.bltDmgInc += applyUpgrade(self.bltDmgRateInc)
+                        self.upgradeDamage()
                     elif event.key == pygame.K_4:
-                        self.bltSpdInc += applyUpgrade(self.bltSpdRateInc)
+                        self.upgradeSpeed()
 
                 # MOUSE CLICKS
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.healthUpBtn.inner.rect.collidepoint(event.pos):
-                        self.player.maxHealth += applyUpgrade(100)
-                        self.player.health += 100
-                    elif self.reloadUpBtn.inner.rect.collidepoint(event.pos) and self.reloadTime > self.minReload:
-                        self.reloadTime = max(self.minReload, self.reloadTime - applyUpgrade(100))
-                        self.player.reload = self.reloadTime
-                    elif event.bulletDmgBtn.inner.rect.collidepoint(event.pos) if hasattr(event, 'bulletDmgBtn') else self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
-                        self.bltDmgInc += applyUpgrade(self.bltDmgRateInc)
+                        self.upgradeHealth()
+                    elif self.reloadUpBtn.inner.rect.collidepoint(event.pos):
+                        self.upgradeReload()
+                    elif self.bulletDmgBtn.inner.rect.collidepoint(event.pos):
+                        self.upgradeDamage()
                     elif self.bulletSpdBtn.inner.rect.collidepoint(event.pos):
-                        self.bltSpdInc += applyUpgrade(self.bltSpdRateInc)
+                        self.upgradeSpeed()
         return gameState
 
     def draw(self, gameScreen, mainScreen):
@@ -218,13 +262,17 @@ class PlayState:
         # Drawing Update Objects
         self.costTxt.draw(mainScreen)
         self.healthUpTxt.draw(mainScreen)
+        self.healthLvlTxt.draw(mainScreen)
         self.healthUpBtn.draw(mainScreen)
         self.reloadUpTxt.draw(mainScreen)
         self.reloadUpBtn.draw(mainScreen)
+        self.reloadLvlTxt.draw(mainScreen)
         self.bulletDmgBtn.draw(mainScreen)
         self.bulletDmgTxt.draw(mainScreen)
+        self.bulletDmgLvlTxt.draw(mainScreen)
         self.bulletSpdTxt.draw(mainScreen)
         self.bulletSpdBtn.draw(mainScreen)
+        self.bulletSpdLvlTxt.draw(mainScreen)
 
         self.guideTxt.draw(mainScreen)
 
@@ -245,6 +293,18 @@ class PlayState:
         self.difficultyInterval = 3000
         self.enemies.clear()
         self.bullets.clear()
+        
         self.cost = 100
         self.costTxt.update(f"Cost: {self.cost}")
         self.scoreTxt.update("score: 0")
+        
+        self.healthLvl = 0
+        self.reloadLvl = 0
+        self.bulletDmgLvl = 0
+        self.bulletSpeedLvl = 0
+        self.regenLvl = 0
+
+        self.healthLvlTxt.update("0")
+        self.reloadLvlTxt.update("0")
+        self.bulletDmgLvlTxt.update("0")
+        self.bulletSpdLvlTxt.update("0")
