@@ -80,6 +80,11 @@ class PlayState:
         self.bulletSpdBtn = TextButton("+", mainScreenWidth+offsetBtn, 180)
         self.bulletSpdLvlTxt = Text(str(self.bulletSpeedLvl), mainScreenWidth+offsetLvl, 182)
 
+        self.regenTxt = Text("Faster Regen", screenWidth+116, 220)
+        self.regenBtn = TextButton("+", mainScreenWidth+offsetBtn, 220)
+        self.regenLvlTxt = Text(str(self.regenLvl), mainScreenWidth+offsetLvl, 222)
+
+
         self.guideTxt = Text("Use Buttons 1-4\nor click the + to\nupgrade your stats!", screenWidth+180, screenHeight-100)
         
         # Timers
@@ -93,6 +98,7 @@ class PlayState:
         self.regenInterval = 10000
         self.reloadTime = self.player.reload
         self.minReload = 50
+        self.minRegen = 2000
         self.minSpawnInterval = 300
         self.difficultyInterval = 3000
 
@@ -127,6 +133,14 @@ class PlayState:
         self.bltSpdInc += self.applyUpgrade(self.bltSpdRateInc, self.bulletSpeedLvl)
         self.bulletSpeedLvl += 1
         self.bulletSpdLvlTxt.update(str(self.bulletSpeedLvl))
+
+    def upgradeRegen(self):
+        if self.regenInterval > self.minRegen:
+            regenDecVal = 1500
+            reduction = self.applyUpgrade(regenDecVal, self.regenLvl)
+            self.regenInterval = max(self.minRegen, self.regenInterval-reduction)
+            self.regenLvl += 1
+            self.regenLvlTxt.update(str(self.regenLvl))
 
     def update(self, keys, dt, gameState, events):
         self.score += (dt / 1000) * self.scoreMultiplier
@@ -189,7 +203,7 @@ class PlayState:
             enemy.update()
             if enemy.collide(self.player):
                 self.playerHitSound.play()
-                self.regenTimer -= self.regenInterval
+                self.regenTimer = 0
                 self.credit += enemy.points
                 self.score += enemy.points * 2 
                 self.playerHealth.update(self.player.health)
@@ -233,6 +247,9 @@ class PlayState:
                         self.upgradeDamage()
                     elif event.key == pygame.K_4:
                         self.upgradeSpeed()
+                    elif event.key == pygame.K_5:
+                        self.upgradeRegen()
+                        print(self.regenInterval)
 
                 # MOUSE CLICKS
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -244,6 +261,9 @@ class PlayState:
                         self.upgradeDamage()
                     elif self.bulletSpdBtn.inner.rect.collidepoint(event.pos):
                         self.upgradeSpeed()
+                    elif self.regenBtn.inner.rect.collidepoint(event.pos):
+                        self.upgradeRegen()
+                        print(self.regenInterval)
         return gameState
 
     def draw(self, gameScreen, mainScreen):
@@ -273,6 +293,9 @@ class PlayState:
         self.bulletSpdTxt.draw(mainScreen)
         self.bulletSpdBtn.draw(mainScreen)
         self.bulletSpdLvlTxt.draw(mainScreen)
+        self.regenTxt.draw(mainScreen)
+        self.regenLvlTxt.draw(mainScreen)
+        self.regenBtn.draw(mainScreen)
 
         self.guideTxt.draw(mainScreen)
 
@@ -308,3 +331,4 @@ class PlayState:
         self.reloadLvlTxt.update("0")
         self.bulletDmgLvlTxt.update("0")
         self.bulletSpdLvlTxt.update("0")
+        self.regenLvlTxt.update("0")
