@@ -115,6 +115,7 @@ class PlayState:
         self.player.health += boost
         self.healthLvl += 1
         self.healthLvlTxt.update(str(self.healthLvl))
+        self.healthUpTxt.enableGlow()
 
     def upgradeReload(self):
         if self.reloadTime > self.minReload:
@@ -123,16 +124,19 @@ class PlayState:
             self.player.reload = self.reloadTime
             self.reloadLvl += 1
             self.reloadLvlTxt.update(str(self.reloadLvl))
+            self.reloadUpTxt.enableGlow()
 
     def upgradeDamage(self):
         self.bltDmgInc += self.applyUpgrade(self.bltDmgRateInc, self.bulletDmgLvl)
         self.bulletDmgLvl += 1
         self.bulletDmgLvlTxt.update(str(self.bulletDmgLvl))
+        self.bulletDmgTxt.enableGlow()
 
     def upgradeSpeed(self):
         self.bltSpdInc += self.applyUpgrade(self.bltSpdRateInc, self.bulletSpeedLvl)
         self.bulletSpeedLvl += 1
         self.bulletSpdLvlTxt.update(str(self.bulletSpeedLvl))
+        self.bulletSpdTxt.enableGlow()
 
     def upgradeRegen(self):
         if self.regenInterval > self.minRegen:
@@ -141,10 +145,16 @@ class PlayState:
             self.regenInterval = max(self.minRegen, self.regenInterval-reduction)
             self.regenLvl += 1
             self.regenLvlTxt.update(str(self.regenLvl))
+            self.regenTxt.enableGlow()
 
     def update(self, keys, dt, gameState, events):
         self.score += (dt / 1000) * self.scoreMultiplier
         self.scoreTxt.update(f"score: {int(self.score)}")
+        self.healthUpTxt.makeGlow(dt)
+        self.reloadUpTxt.makeGlow(dt)
+        self.bulletDmgTxt.makeGlow(dt)
+        self.bulletSpdTxt.makeGlow(dt)
+        self.regenTxt.makeGlow(dt)
 
         self.spawnTime += dt
         self.shootTime += dt
@@ -312,6 +322,7 @@ class PlayState:
         self.regenTimer = 0
         self.enemyHealthBuffs = 0 
         self.spawnInterval = 3000
+        self.regenInterval = 10000
         self.reloadTime = self.player.reload
         self.difficultyInterval = 3000
         self.enemies.clear()

@@ -1,8 +1,10 @@
 import pygame
+from utils import resource_path
 
 class LoadSound:
     def __init__(self, path, vol=1.0) -> None:
-        self.soundSfx = pygame.mixer.Sound(path)
+        self.fullPath = resource_path(path)
+        self.soundSfx = pygame.mixer.Sound(self.fullPath)
         self.soundSfx.set_volume(vol)
 
     def play(self):
@@ -13,11 +15,11 @@ class LoadSound:
 
 class LoadMusic:
     def __init__(self, path, vol=0.3) -> None:
-        self.path = path
+        self.fullPath = resource_path(path)
         self.vol = vol
 
     def play(self, loops=-1):
-        pygame.mixer.music.load(self.path)
+        pygame.mixer.music.load(self.fullPath)
         pygame.mixer.music.set_volume(self.vol)
         pygame.mixer.music.play(loops=loops)
 

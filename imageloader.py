@@ -1,9 +1,10 @@
 import pygame
+from utils import resource_path
 
 class loadImage:
     def __init__(self, path, scale, posX, posY):
-
-        self.rawImage = pygame.image.load(path).convert_alpha()
+        self.fullPath = resource_path(path)
+        self.rawImage = pygame.image.load(self.fullPath).convert_alpha()
         self.image = pygame.transform.scale_by(
             self.rawImage, scale
         )

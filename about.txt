@@ -4,5 +4,4 @@ bullet vairation, curving, auto aim, burst fire and more
 add boss
     the more the enetity pass the higher hp the boss is
 add a difficulty scaling, variable to keep track of cur diff lvl
-add golden glow for 1 sec when upgrade
 add particle effect
